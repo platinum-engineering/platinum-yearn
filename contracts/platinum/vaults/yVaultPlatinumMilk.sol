@@ -8,7 +8,7 @@ import "openzeppelinV2/token/ERC20/ERC20.sol";
 import "openzeppelinV2/token/ERC20/ERC20Detailed.sol";
 import "openzeppelinV2/ownership/Ownable.sol";
 
-import "../../interfaces/yearn/IController.sol";
+import "../../../interfaces/yearn/IController.sol";
 
 contract yVaultPlatinumMilk is ERC20, ERC20Detailed {
     using SafeERC20 for IERC20;

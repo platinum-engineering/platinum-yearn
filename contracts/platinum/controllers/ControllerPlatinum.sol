@@ -7,12 +7,9 @@ import "openzeppelinV2/math/SafeMath.sol";
 import "openzeppelinV2/utils/Address.sol";
 import "openzeppelinV2/token/ERC20/SafeERC20.sol";
 
-import "../../interfaces/yearn/Converter.sol";
-import "../../interfaces/yearn/OneSplitAudit.sol";
-import "../../interfaces/yearn/Strategy.sol";
-
-//TODO
-//1. Converter handle contract
+import "../../../interfaces/yearn/Converter.sol";
+import "../../../interfaces/yearn/OneSplitAudit.sol";
+import "../../../interfaces/yearn/Strategy.sol";
 
 contract ControllerPlatinum {
     using SafeERC20 for IERC20;
