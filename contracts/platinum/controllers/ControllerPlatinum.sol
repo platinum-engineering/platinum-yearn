@@ -7,11 +7,11 @@ import "openzeppelinV2/math/SafeMath.sol";
 import "openzeppelinV2/utils/Address.sol";
 import "openzeppelinV2/token/ERC20/SafeERC20.sol";
 
-import "../../interfaces/yearn/Converter.sol";
-import "../../interfaces/yearn/OneSplitAudit.sol";
-import "../../interfaces/yearn/Strategy.sol";
+import "../../../interfaces/yearn/Converter.sol";
+import "../../../interfaces/yearn/OneSplitAudit.sol";
+import "../../../interfaces/yearn/Strategy.sol";
 
-contract Controller {
+contract ControllerPlatinum {
     using SafeERC20 for IERC20;
     using Address for address;
     using SafeMath for uint256;

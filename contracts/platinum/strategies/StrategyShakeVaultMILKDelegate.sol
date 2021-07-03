@@ -5,14 +5,14 @@ import "openzeppelinV2/math/SafeMath.sol";
 import "openzeppelinV2/utils/Address.sol";
 import "openzeppelinV2/token/ERC20/SafeERC20.sol";
 
-import "../../interfaces/maker/Maker.sol";
-import "../../interfaces/uniswap/Uni.sol";
+import "../../../interfaces/maker/Maker.sol";
+import "../../../interfaces/uniswap/Uni.sol";
 
-import "../../interfaces/yearn/IController.sol";
-import "../../interfaces/yearn/Strategy.sol";
-import "../../interfaces/yearn/Vault.sol";
+import "../../../interfaces/yearn/IController.sol";
+import "../../../interfaces/yearn/Strategy.sol";
+import "../../../interfaces/yearn/Vault.sol";
 
-contract StrategyMKRVaultDAIDelegate {
+contract StrategyShakeVaultMILKDelegate {
     using SafeERC20 for IERC20;
     using Address for address;
     using SafeMath for uint256;
@@ -66,7 +66,7 @@ contract StrategyMKRVaultDAIDelegate {
     }
 
     function getName() external pure returns (string memory) {
-        return "StrategyMKRVaultDAIDelegate";
+        return "StrategyShakeVaultMILKDelegate";
     }
 
     function setStrategist(address _strategist) external {
@@ -94,11 +94,13 @@ contract StrategyMKRVaultDAIDelegate {
         strategistReward = _strategistReward;
     }
 
+    //TODO
     function setBorrowCollateralizationRatio(uint256 _c) external {
         require(msg.sender == governance, "!governance");
         c = _c;
     }
 
+    //TODO
     function setWithdrawCollateralizationRatio(uint256 _c_safe) external {
         require(msg.sender == governance, "!governance");
         c_safe = _c_safe;
@@ -109,6 +111,7 @@ contract StrategyMKRVaultDAIDelegate {
         eth_price_oracle = _oracle;
     }
 
+    //TODO
     // optional
     function setMCDValue(
         address _manager,
@@ -126,6 +129,7 @@ contract StrategyMKRVaultDAIDelegate {
         jug = _jug;
     }
 
+    //TODO
     function _approveAll() internal {
         IERC20(token).approve(mcd_join_eth_a, uint256(-1));
         IERC20(dai).approve(mcd_join_dai, uint256(-1));
@@ -133,6 +137,7 @@ contract StrategyMKRVaultDAIDelegate {
         IERC20(dai).approve(unirouter, uint256(-1));
     }
 
+    //TODO !!!
     function deposit() public {
         uint256 _token = IERC20(token).balanceOf(address(this));
         if (_token > 0) {
@@ -146,12 +151,14 @@ contract StrategyMKRVaultDAIDelegate {
         Vault(yVaultDAI).depositAll();
     }
 
+    //TODO
     function _getPrice() internal view returns (uint256 p) {
         (uint256 _read, ) = OSMedianizer(eth_price_oracle).read();
         (uint256 _foresight, ) = OSMedianizer(eth_price_oracle).foresight();
         p = _foresight < _read ? _foresight : _read;
     }
 
+    //TODO
     function _checkDebtCeiling(uint256 _amt) internal view returns (bool) {
         (, , , uint256 _line, ) = VatLike(vat).ilks(ilk);
         uint256 _debt = getTotalDebtAmount().add(_amt);
@@ -161,6 +168,7 @@ contract StrategyMKRVaultDAIDelegate {
         return true;
     }
 
+    //TODO
     function _lockWETHAndDrawDAI(uint256 wad, uint256 wadD) internal {
         address urn = ManagerLike(cdp_manager).urns(cdpId);
 
@@ -174,6 +182,7 @@ contract StrategyMKRVaultDAIDelegate {
         DaiJoinLike(mcd_join_dai).exit(address(this), wadD);
     }
 
+    //TODO
     function _getDrawDart(address urn, uint256 wad) internal returns (int256 dart) {
         uint256 rate = JugLike(jug).drip(ilk);
         uint256 _dai = VatLike(vat).dai(urn);
@@ -190,6 +199,7 @@ contract StrategyMKRVaultDAIDelegate {
         require(y >= 0, "int-overflow");
     }
 
+    //TODO
     // Controller only function for creating additional rewards from dust
     function withdraw(IERC20 _asset) external returns (uint256 balance) {
         require(msg.sender == controller, "!controller");
@@ -200,6 +210,7 @@ contract StrategyMKRVaultDAIDelegate {
         _asset.safeTransfer(controller, balance);
     }
 
+    //TODO
     // Withdraw partial funds, normally used with a vault withdrawal
     function withdraw(uint256 _amount) external {
         require(msg.sender == controller, "!controller");
@@ -218,6 +229,7 @@ contract StrategyMKRVaultDAIDelegate {
         IERC20(want).safeTransfer(_vault, _amount.sub(_fee));
     }
 
+    //TODO
     function _withdrawSome(uint256 _amount) internal returns (uint256) {
         if (getTotalDebtAmount() != 0 && getmVaultRatio(_amount) < c_safe.mul(1e2)) {
             uint256 p = _getPrice();
@@ -229,12 +241,14 @@ contract StrategyMKRVaultDAIDelegate {
         return _amount;
     }
 
+    //TODO
     function _freeWETH(uint256 wad) internal {
         ManagerLike(cdp_manager).frob(cdpId, -toInt(wad), 0);
         ManagerLike(cdp_manager).flux(cdpId, address(this), wad);
         GemJoinLike(mcd_join_eth_a).exit(address(this), wad);
     }
 
+    //TODO
     function _wipe(uint256 wad) internal {
         // wad in DAI
         address urn = ManagerLike(cdp_manager).urns(cdpId);
@@ -243,6 +257,7 @@ contract StrategyMKRVaultDAIDelegate {
         ManagerLike(cdp_manager).frob(cdpId, 0, _getWipeDart(VatLike(vat).dai(urn), urn));
     }
 
+    //TODO
     function _getWipeDart(uint256 _dai, address urn) internal view returns (int256 dart) {
         (, uint256 rate, , , ) = VatLike(vat).ilks(ilk);
         (, uint256 art) = VatLike(vat).urns(ilk, urn);
@@ -251,6 +266,7 @@ contract StrategyMKRVaultDAIDelegate {
         dart = uint256(dart) <= art ? -dart : -toInt(art);
     }
 
+    //TODO
     // Withdraw all funds, normally used when migrating strategies
     function withdrawAll() external returns (uint256 balance) {
         require(msg.sender == controller, "!controller");
@@ -264,12 +280,14 @@ contract StrategyMKRVaultDAIDelegate {
         IERC20(want).safeTransfer(_vault, balance);
     }
 
+    //TODO
     function _withdrawAll() internal {
         Vault(yVaultDAI).withdrawAll(); // get Dai
         _wipe(getTotalDebtAmount().add(1)); // in case of edge case
         _freeWETH(balanceOfmVault());
     }
 
+    //TODO
     function balanceOf() public view returns (uint256) {
         return balanceOfWant().add(balanceOfmVault());
     }
@@ -278,6 +296,7 @@ contract StrategyMKRVaultDAIDelegate {
         return IERC20(want).balanceOf(address(this));
     }
 
+    //TODO
     function balanceOfmVault() public view returns (uint256) {
         uint256 ink;
         address urnHandler = ManagerLike(cdp_manager).urns(cdpId);
@@ -285,6 +304,7 @@ contract StrategyMKRVaultDAIDelegate {
         return ink;
     }
 
+    //TODO
     function harvest() public {
         require(msg.sender == strategist || msg.sender == harvester || msg.sender == governance, "!authorized");
 
@@ -308,6 +328,7 @@ contract StrategyMKRVaultDAIDelegate {
         deposit();
     }
 
+    //TODO
     function shouldDraw() external view returns (bool) {
         uint256 _safe = c.mul(1e2);
         uint256 _current = getmVaultRatio(0);
@@ -317,6 +338,7 @@ contract StrategyMKRVaultDAIDelegate {
         return (_current > _safe);
     }
 
+    //TODO
     function drawAmount() public view returns (uint256) {
         uint256 _safe = c.mul(1e2);
         uint256 _current = getmVaultRatio(0);
@@ -332,6 +354,7 @@ contract StrategyMKRVaultDAIDelegate {
         return 0;
     }
 
+    //TODO
     function draw() external {
         uint256 _drawD = drawAmount();
         if (_drawD > 0) {
@@ -340,6 +363,7 @@ contract StrategyMKRVaultDAIDelegate {
         }
     }
 
+    //TODO
     function shouldRepay() external view returns (bool) {
         uint256 _safe = c.mul(1e2);
         uint256 _current = getmVaultRatio(0);
@@ -347,6 +371,7 @@ contract StrategyMKRVaultDAIDelegate {
         return (_current < _safe);
     }
 
+    //TODO
     function repayAmount() public view returns (uint256) {
         uint256 _safe = c.mul(1e2);
         uint256 _current = getmVaultRatio(0);
@@ -359,6 +384,7 @@ contract StrategyMKRVaultDAIDelegate {
         return 0;
     }
 
+    //TODO
     function repay() external {
         uint256 free = repayAmount();
         if (free > 0) {
@@ -366,11 +392,13 @@ contract StrategyMKRVaultDAIDelegate {
         }
     }
 
+    //TODO
     function forceRebalance(uint256 _amount) external {
         require(msg.sender == governance || msg.sender == strategist || msg.sender == harvester, "!authorized");
         _wipe(_withdrawDaiLeast(_amount));
     }
 
+    //TODO
     function getTotalDebtAmount() public view returns (uint256) {
         uint256 art;
         uint256 rate;
@@ -380,6 +408,7 @@ contract StrategyMKRVaultDAIDelegate {
         return art.mul(rate).div(1e27);
     }
 
+    //TODO
     function getmVaultRatio(uint256 amount) public view returns (uint256) {
         uint256 spot; // ray
         uint256 liquidationRatio; // ray
@@ -404,10 +433,12 @@ contract StrategyMKRVaultDAIDelegate {
         return numerator.div(denominator).div(1e3);
     }
 
+    //TODO
     function getUnderlyingDai() public view returns (uint256) {
         return IERC20(yVaultDAI).balanceOf(address(this)).mul(Vault(yVaultDAI).getPricePerFullShare()).div(1e18);
     }
 
+    //TODO
     function _withdrawDaiMost(uint256 _amount) internal returns (uint256) {
         uint256 _shares = _amount.mul(1e18).div(Vault(yVaultDAI).getPricePerFullShare());
 
@@ -421,6 +452,7 @@ contract StrategyMKRVaultDAIDelegate {
         return _after.sub(_before);
     }
 
+    //TODO
     function _withdrawDaiLeast(uint256 _amount) internal returns (uint256) {
         uint256 _shares = _amount.mul(1e18).div(Vault(yVaultDAI).getPricePerFullShare()).mul(withdrawalMax).div(
             withdrawalMax.sub(withdrawalFee)
@@ -436,6 +468,7 @@ contract StrategyMKRVaultDAIDelegate {
         return _after.sub(_before);
     }
 
+    //TODO
     function _swap(uint256 _amountIn) internal {
         address[] memory path = new address[](2);
         path[0] = address(dai);
